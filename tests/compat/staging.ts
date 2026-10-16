@@ -62,6 +62,7 @@ function hostDepsOf(baseline: Baseline): Record<string, string> {
   return {
     '@deepseek-ai/cordis': baseline.cordis,
     '@deepseek-ai/dsh-session': baseline.session,
+    ...(baseline.id === 'v0.2.1-alpha.4' ? { '@deepseek-ai/dsh-scope': baseline.session } : {}),
   }
 }
 
@@ -269,6 +270,12 @@ export function runDriver(baseline: Baseline): DriverReport {
   stageFile(baseline, 'packages/session/session-projection/src/index.ts', join('registry', 'index.ts'))
   stageFile(baseline, 'packages/session/session-projection/src/types.ts', join('registry', 'types.ts'))
   stageFile(baseline, 'packages/util/values/src/index.ts', join('dsh', 'json-values.ts'))
+  // The alpha.4 values barrel re-exports its new partial-JSON scanner. Stage
+  // that module too and preserve its relative ./index.ts import as a copy.
+  if (baseline.id === 'v0.2.1-alpha.4') {
+    stageFile(baseline, 'packages/util/values/src/index.ts', join('dsh', 'index.ts'))
+    stageFile(baseline, 'packages/util/values/src/partial-json.ts', join('dsh', 'partial-json.ts'))
+  }
   const driver = join(STAGE, baseline.id, 'driver.mjs')
   writeFileSync(driver, driverSource(`file://${join(REPO, 'lib', 'index.js')}`, baseline.foldEventTypes.includes('developer/message')))
   const run = spawnSync(process.execPath, [driver], { cwd: STAGE, encoding: 'utf8', timeout: 60_000 })

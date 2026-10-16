@@ -16,7 +16,7 @@
  */
 
 /** The supported dsh tags, in lockstep with the BASELINES entries below. */
-export type BaselineId = 'v0.1.7-rc.2' | 'v0.2.0-rc.2'
+export type BaselineId = 'v0.1.7-rc.2' | 'v0.2.0-rc.2' | 'v0.2.1-alpha.4'
 
 /** The harness web half's client faces, as far as the compat probes consume them. */
 export interface ClientSeam {
@@ -206,11 +206,11 @@ export interface Baseline {
 
 /** One support-matrix entry. Every supported line is the V4 generation, so
  * the seams are spelled once here; a future line that diverges on a needle outgrows the factory (inline its entry instead). */
-function baseline(id: BaselineId, tag: string, session: string): Baseline {
+function baseline(id: BaselineId, tag: string, session: string, cordis = '4.0.4'): Baseline {
   return {
     id,
     tag,
-    cordis: '4.0.4',
+    cordis,
     session,
     foldEventTypes: [
       'request/header', 'request/context', 'step/start', 'step/end',
@@ -353,4 +353,8 @@ export const BASELINES: readonly Baseline[] = [
   // session-format tree carries no v4-to-v5 migration). Cordis stays 4.0.4,
   // and the line continues to enforce the plugin dsh-peer gate this plugin's `>=0.1.7-rc.2` peers satisfy.
   baseline('v0.2.0-rc.2', 'dsh-v0.2.0-rc.2', '0.2.0-rc.2'),
+  // The Portable target retains the V4 projection, settings, client slot and
+  // session navigation contracts. Pin its actual release tag, not a moving
+  // checkout: the real-source matrix exercises its registry and client faces.
+  baseline('v0.2.1-alpha.4', 'dsh-v0.2.1-alpha.4', '0.2.1-alpha.4', '4.0.5-alpha.2'),
 ]
